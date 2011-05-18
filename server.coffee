@@ -1,0 +1,1 @@
+require __dirname+'/lib/filepad.coffee'

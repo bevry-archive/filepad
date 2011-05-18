@@ -1,0 +1,64 @@
+{
+	"name": "filepad",
+	"version": "0.1.0",
+	"description": "FilePad is a file browser and editor built with node.js, coffeecript and nowpad",
+	"homepage": "https://github.com/balupton/filepad",
+	"keywords": [
+		"javascript",
+		"coffeescript",
+		"files",
+		"ide",
+		"editor",
+		"browser"
+	],
+	"author": {
+		"name": "Benjamin Lupton",
+		"email": "b@lupton.cc",
+		"web": "http://balupton.com"
+	},
+	"maintainers": [
+		{
+			"name": "Benjamin Lupton",
+			"email": "b@lupton.cc",
+			"web": "http://balupton.com"
+		}
+	],
+	"contributors": [
+		{
+			"name": "Benjamin Lupton",
+			"email": "b@lupton.cc",
+			"web": "http://balupton.com"
+		}
+	],
+	"bugs": {
+		"web": "https://github.com/balupton/filepad/issues"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://creativecommons.org/licenses/MIT/"
+		}
+	],
+	"repository" : {
+		"type" : "git",
+		"url" : "http://github.com/balupton/filepad.git"
+	},
+	"dependencies": {
+		"express": ">=2.3.2",
+		"watch": ">=0.3.1",
+		"bal-util": ">=0.1.0",
+		"now": ">=0.1.0",
+		"nowpad": ">=0.1.0",
+		"coffee4clients": ">=0.1.0"
+	},
+	"engines" : {
+		"node": ">=0.4.0"
+	},
+	"bin": {
+		"docpad": "./bin/filepad.coffee"
+	},
+	"directories": {
+		"lib": "lib"
+	},
+	"main": "./lib/filepad.coffee"
+}
