@@ -1,62 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>FilePad!</title>
-  </head>
-  <body>
-    <aside id="sidebar">
-      <div class="tabs">
-        <section id="files" class="tab">
-          <header>Files</header>
-          <nav>
-            <li class="dir">
-              <span>documents</span>
-              <nav>
-                <li class="file">
-                  <span>index.html</span>
-                </li>
-              </nav>
-            </li>
-            <li class="dir">
-              <span>layouts</span>
-              <nav>
-                <li class="file">
-                  <span>default.html</span>
-                </li>
-              </nav>
-            </li>
-            <li class="dir">
-              <span>files</span>
-              <nav>
-                <li class="dir">
-                  <span>styles</span>
-                  <nav>
-                    <li class="file">
-                      <span>style.less</span>
-                    </li>
-                  </nav>
-                </li>
-              </li>
-            </nav>
-          </nav>
-        </section>
-      </div>
-      <nav id="actions">
-        <li id="new">New File</li>
-        <li id="del">Del File</li>
-        <li id="cnt">5 files</li>
-      </nav>
-    </aside>
-    <div id="pad">
-      <section class="document tab">
-        <header>Document One <del>close</del></header>
-        <div class="editable"><pre class="ace"/></div>
-      </section>
-    </div>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-    <script src="http://ajaxorg.github.com/ace/build/src/ace.js"></script>
-    <script src="/now/now.js"></script>
-    <script src="/now/nowpad.js"></script>
-    <script src="/scripts/script.coffee"></script>
-  </body>
+	<head>
+		<title>FilePad!</title>
+		<link href="http://fonts.googleapis.com/css?family=Damion:regular" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet/less" href="/styles/style.less" type="text/css" />
+		<script src="http://lesscss.org/js/less.js"></script>
+	</head>
+	<body>
+		<section id="header">
+			<header><a href="https://github.com/balupton/filepad">FilePad</a> by <a href="http://balupton.com">Benjamin Lupton</a></header>
+		</section>
+		<aside id="sidebar">
+			<nav class="tabs">
+				<li class="tab active" for="files">Files</li>
+				<li class="tab" for="users">Users</li>
+			</nav>
+			<div class="panels">
+				<section id="files" class="panel active">
+					<nav class="tree files">
+						<li class="dir">
+							<span>documents</span>
+							<nav>
+								<li class="file">
+									<span>index.html</span>
+								</li>
+							</nav>
+						</li>
+						<li class="dir">
+							<span>layouts</span>
+							<nav>
+								<li class="file">
+									<span>default.html</span>
+								</li>
+							</nav>
+						</li>
+						<li class="dir">
+							<span>files</span>
+							<nav>
+								<li class="dir">
+									<span>styles</span>
+									<nav>
+										<li class="file">
+											<span>style.less</span>
+										</li>
+									</nav>
+								</li>
+							</li>
+						</li>
+					</nav>
+				</section>
+				<section id="users" class="panel">
+					not yet done
+				</section>
+			</div>
+			<nav id="actions" class="actions">
+				<li id="new" class="action" title="New file">+</li>
+				<li id="del" class="action" title="Delete file">-</li>
+				<li id="cnt" class="action-status">5 files</li>
+			</nav>
+		</aside>
+		<div id="main">
+			<nav class="tabs">
+				<li class="tab active" for="file-index-html">index.html</li>
+				<li class="tab" for="file-styles-style-css">styles/style.css</li>
+			</nav>
+			<div class="panels">
+				<section id="file-index-html" class="panel active">
+					<div class="editable"><pre class="ace"/></div>
+				</section>
+				<section id="file-styles-style-asd" class="panel active">
+				</section>
+			</div>
+		</div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/ace.js"></script>
+		<script src="/nowjs/now.js"></script>
+		<script src="/nowpad/nowpad.js"></script>
+		<script src="/scripts/script.coffee"></script>
+	</body>
 </html>

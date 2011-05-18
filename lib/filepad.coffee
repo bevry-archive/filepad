@@ -22,10 +22,21 @@ filepad =
 	# Filepad
 	files:
 		slugToPath: {}
+		slugs: {}
 		tree: {}
 
 	# Initialise
 	init: ->
+		# File Path
+		if process.argv[2]
+			@filePath = process.argv[2]
+			if @filePath.substring(0,1) is '.'
+				@filePath = process.cwd() + '/' + @filePath
+		fs.realpath @filePath, (err,@filePath) =>
+			@initServer()
+	
+	# Init Server
+	initServer: ->
 		# Create Server
 		@app = express.createServer()
 
@@ -54,7 +65,7 @@ filepad =
 		console.log 'Express server listening on port %d', @app.address().port
 
 		# File Center then Communication Center
-		@fileCenter -> @comCenter
+		@fileCenter => @comCenter()
 	
 	# Establish a File Center
 	fileCenter: (next) ->
@@ -67,7 +78,7 @@ filepad =
 			(fileFullPath,fileRelativePath,next) ->
 				# Add file
 				filepad.addFile fileFullPath
-					
+
 				# Continue
 				next()
 			
@@ -80,6 +91,8 @@ filepad =
 				throw err if err
 				# Success
 				filepad.broadcastFiles()
+				# Next
+				next()
 		)
 
 		# Setup up watches for the files
@@ -111,32 +124,31 @@ filepad =
 			# Success
 			fs.writefile fileFullPath, value, (err) ->
 				throw err if err
-		
-		# Continue to the next objective
-		next()
 	
 	# Add a file
 	addFile: (fileFullPath) ->
 		# Fetch
 		fileRelativePath = fileFullPath.replace(@filePath,'').replace(/^\/+/,'')
 		fileSlug = util.generateSlugSync fileRelativePath
-
+	
 		# Check
-		unless @files.slugToPath[fileSlug]?
+		if @files.slugToPath[fileSlug]
 			return # Nothing to do
-
-		# Add to Object
+	
+		# Add to Objects
 		@files.slugToPath[fileSlug] = fileFullPath
+		@files.slugs[fileSlug] = true
 
 		# Add to Tree
 		fileTree = path.dirname(fileRelativePath).split '/'
 		fileParent = @files.tree
 		for dir in fileTree
-			unless dir
+			if not dir or dir is '.'
 				continue
-			unless fileParent[dir]?
+			if not fileParent[dir]
 				fileParent[dir] = {}
-		fileParent[path.basename(fileRelativePath)] = true
+			fileParent = fileParent[dir]
+		fileParent[path.basename(fileRelativePath)] = fileSlug
 
 		# Add to nowpad
 		fs.readFile fileFullPath, (err,data) ->
@@ -154,20 +166,22 @@ filepad =
 		fileSlug = util.generateSlugSync fileRelativePath
 
 		# Check
-		unless @files.slugToPath[fileSlug]?
+		if not @files.slugToPath[fileSlug]
 			return # Nothing to do
 
 		# Delete from Object
 		delete @files.slugToPath[fileSlug]
+		delete @files.slugs[fileSlug]
 
 		# Delete from Tree
 		fileTree = path.dirname(fileRelativePath).split '/'
 		fileParent = @files.tree
 		for dir in fileTree
-			unless dir
+			if not dir or dir is '.'
 				continue
-			unless fileParent[dir]?
+			if not fileParent[dir]
 				fileParent[dir] = {}
+			fileParent = fileParent[dir]
 		delete fileParent[path.basename(fileRelativePath)]
 
 		# Remove from nowpad
@@ -178,7 +192,7 @@ filepad =
 	
 	# Broadcast the list of files to all clients
 	broadcastFiles: ->
-		@everyone.now.notifyFiles @files if @everyone.now.notifyFiles
+		@everyone.now.notifyFiles {slugs: @files.slugs, tree: @files.tree} if @everyone.now.notifyFiles
 
 	# Establish Communication Center between Client and Server
 	comCenter: ->
@@ -189,7 +203,7 @@ filepad =
 
 		# A client has disconnected
 		everyone.disconnected ->
-		
+
 		# A client is shaking hands with the server
 		# next(err,files)
 		everyone.now.handshake = (notifyList,next) ->
@@ -201,7 +215,7 @@ filepad =
 			@now.notifyList = notifyList
 
 			# Return a list of files
-			next false, filepad.files
+			next false, {slugs: filepad.files.slugs, tree: filepad.files.tree}
 		
 		# Create a a new file
 		# next(err,slug,fileRelativePath)
