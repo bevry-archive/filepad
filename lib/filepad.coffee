@@ -21,9 +21,10 @@ filepad =
 
 	# Filepad
 	files:
-		slugToPath: {}
-		slugs: {}
+		slugsToFullPath: {}
+		slugsToRelativePath: {}
 		tree: {}
+		slugsToValue: {}
 
 	# Initialise
 	init: ->
@@ -116,14 +117,8 @@ filepad =
 				filepad.broadcastFiles()
 		
 		# Fire when a change syncs to the server
-		nowpad.bind 'sync', (documentId,value) ->
-			fileFullPath = filepad.files.slugToPath[documentId]
-			# Check
-			unless fileFullPath
-				throw new Error 'Could not find the file with slug '+documentId
-			# Success
-			fs.writefile fileFullPath, value, (err) ->
-				throw err if err
+		nowpad.bind 'sync', (fileId,value) ->
+			filepad.files.slugsToValue[fileId] = value
 	
 	# Add a file
 	addFile: (fileFullPath) ->
@@ -132,12 +127,12 @@ filepad =
 		fileSlug = util.generateSlugSync fileRelativePath
 	
 		# Check
-		if @files.slugToPath[fileSlug]
+		if @files.slugsToFullPath[fileSlug]
 			return # Nothing to do
 	
 		# Add to Objects
-		@files.slugToPath[fileSlug] = fileFullPath
-		@files.slugs[fileSlug] = true
+		@files.slugsToFullPath[fileSlug] = fileFullPath
+		@files.slugsToRelativePath[fileSlug] = fileRelativePath
 
 		# Add to Tree
 		fileTree = path.dirname(fileRelativePath).split '/'
@@ -166,12 +161,12 @@ filepad =
 		fileSlug = util.generateSlugSync fileRelativePath
 
 		# Check
-		if not @files.slugToPath[fileSlug]
+		if not @files.slugsToFullPath[fileSlug]
 			return # Nothing to do
 
 		# Delete from Object
-		delete @files.slugToPath[fileSlug]
-		delete @files.slugs[fileSlug]
+		delete @files.slugsToFullPath[fileSlug]
+		delete @files.slugsToRelativePath[fileSlug]
 
 		# Delete from Tree
 		fileTree = path.dirname(fileRelativePath).split '/'
@@ -192,7 +187,7 @@ filepad =
 	
 	# Broadcast the list of files to all clients
 	broadcastFiles: ->
-		@everyone.now.notifyFiles {slugs: @files.slugs, tree: @files.tree} if @everyone.now.notifyFiles
+		@everyone.now.filepad_notifyList false, {slugsToPath: @files.slugsToRelativePath, tree: @files.tree} if @everyone.now.filepad_notifyList
 
 	# Establish Communication Center between Client and Server
 	comCenter: ->
@@ -206,20 +201,20 @@ filepad =
 
 		# A client is shaking hands with the server
 		# next(err,files)
-		everyone.now.handshake = (notifyList,next) ->
+		everyone.now.filepad_handshake = (notifyList,next) ->
 			# Check
 			if (typeof notifyList isnt 'function') or (typeof next isnt 'function')
 				next new Error 'Invalid arguments'
 			
 			# Apply
-			@now.notifyList = notifyList
+			@now.filepad_notifyList = notifyList
 
 			# Return a list of files
-			next false, {slugs: filepad.files.slugs, tree: filepad.files.tree}
+			next false, {slugsToPath: filepad.files.slugsToRelativePath, tree: filepad.files.tree}
 		
 		# Create a a new file
 		# next(err,slug,fileRelativePath)
-		everyone.now.newFile = (fileRelativePath,next) ->
+		everyone.now.filepad_newFile = (fileRelativePath,next) ->
 			fileFullPath = filepad.filePath + '/' + fileRelativePath.replace(/^\/+/,'')
 			util.resolvePath fileFullPath, (err,fileFullPath,fileRelativePath) ->
 				if err then return next err
@@ -236,7 +231,7 @@ filepad =
 
 		# Delete an existing file
 		# next(err,slug,fileRelativePath)
-		everyone.now.delFile = (fileRelativePath,next) ->
+		everyone.now.filepad_delFile = (fileRelativePath,next) ->
 			fileFullPath = filepad.filePath + '/' + fileRelativePath.replace(/^\/+/,'')
 			util.resolvePath fileFullPath, (err,fileFullPath,fileRelativePath) ->
 				if err then return next err
@@ -247,7 +242,25 @@ filepad =
 					# Success
 					filepad.delFile fileFullPath
 					next false, slug, fileRelativePath
+		
+		# Save a file
+		# next(err)
+		everyone.now.filepad_saveFile = (fileId,next) ->
+			fileFullPath = filepad.files.slugsToFullPath[fileId]
+			# Check
+			unless fileFullPath
+				throw new Error 'Could not find the file with id '+fileId
+			# Success
+			fs.writeFile fileFullPath, filepad.files.slugsToValue[fileId], (err) ->
+				throw err if err
+				next false
 
+		# Revert a file
+		# next(err)
+		everyone.now.filepad_saveFile = (fileId,next) ->
+			# Read the local file
+			# Submit the patch to nowpad
+			# Clients will be synced
 
 # Initialise
 filepad.init()

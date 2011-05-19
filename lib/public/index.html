@@ -2,11 +2,18 @@
 <html lang="en">
 	<head>
 		<title>FilePad!</title>
+		<link href='http://fonts.googleapis.com/css?family=Nunito' rel='stylesheet' type='text/css'>
 		<link href="http://fonts.googleapis.com/css?family=Damion:regular" rel="stylesheet" type="text/css" />
-		<link rel="stylesheet/less" href="/styles/style.less" type="text/css" />
-		<script src="http://lesscss.org/js/less.js"></script>
+		<link rel="stylesheet" href="/styles/style.css" type="text/css" />
 	</head>
 	<body>
+		<div id="overlay"></div>
+		<section id="login">
+			<header id="login-header">Login to FilePad</header>
+			<input type="text" name="username" id="login-username" placeholder="username"/>
+			<input type="password" name="password" id="login-password" placeholder="password"/>
+			<input type="submit" class="button orange" id="login-submit" value="Login"/>
+		</section>
 		<section id="header">
 			<header><a href="https://github.com/balupton/filepad">FilePad</a> by <a href="http://balupton.com">Benjamin Lupton</a></header>
 		</section>
@@ -54,9 +61,9 @@
 				</section>
 			</div>
 			<nav id="actions" class="actions">
-				<li id="new" class="action" title="New file">+</li>
-				<li id="del" class="action" title="Delete file">-</li>
-				<li id="cnt" class="action-status">5 files</li>
+				<li id="files-new" class="action" title="New file">+</li>
+				<li id="files-del" class="action" title="Delete file">-</li>
+				<li id="files-count" class="action-status">5 files</li>
 			</nav>
 		</aside>
 		<div id="main">
@@ -71,9 +78,28 @@
 				<section id="file-styles-style-asd" class="panel active">
 				</section>
 			</div>
+			<nav id="actions" class="actions">
+				<li id="main-save" class="action" title="Save changes">Save</li>
+				<li id="main-revert" class="action" title="Revert changes">Revert</li>
+				<li id="main-count" class="action-status">5 connected users</li>
+			</nav>
 		</div>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
 		<script src="http://ajaxorg.github.com/ace/build/src/ace.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-c_cpp.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-clojure.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-coffee.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-csharp.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-css.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-html.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-java.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-javascript.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-perl.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-php.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-python.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-ruby.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-svg.js"></script>
+		<script src="http://ajaxorg.github.com/ace/build/src/mode-xml.js"></script>
 		<script src="/nowjs/now.js"></script>
 		<script src="/nowpad/nowpad.js"></script>
 		<script src="/scripts/script.coffee"></script>
