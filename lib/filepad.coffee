@@ -9,13 +9,13 @@ watch = require 'watch'
 util = require 'bal-util'
 coffee = require 'coffee-script'
 
-# -------------------------------------
-# Server
+# Filepad
+class Filepad
 
-filepad =
 	# Server
-	app: null
+	server: null
 	everyone: null
+	port: 9573
 	filePath: process.cwd()
 	publicPath: __dirname+'/public'
 
@@ -27,49 +27,53 @@ filepad =
 		slugsToValue: {}
 
 	# Initialise
-	init: ->
-		# File Path
-		if process.argv[2]
-			@filePath = process.argv[2]
-			if @filePath.substring(0,1) is '.'
-				@filePath = process.cwd() + '/' + @filePath
-		fs.realpath @filePath, (err,@filePath) =>
-			@initServer()
+	constructor: ({path,port}={}) ->
+		# Prepare
+		@filePath = path || process.argv[2] || @filePath
+		@port = port || @port
+
+		# Correct
+		if @filePath.substring(0,1) is '.'
+			@filePath = process.cwd() + '/' + @filePath
 	
-	# Init Server
-	initServer: ->
+		# Check
+		fs.realpath @filePath, (err) =>
+			throw err
+		
 		# Create Server
-		@app = express.createServer()
+		@server = express.createServer()
 
 		# Configure Server
-		@app.configure =>
+		@server.configure =>
 			# Standard
-			@app.use express.errorHandler()
-			@app.use express.bodyParser()
-			@app.use express.methodOverride()
+			@server.use express.errorHandler()
+			@server.use express.bodyParser()
+			@server.use express.methodOverride()
 
 			# Routing
-			@app.use @app.router
-			@app.use express.static @publicPath
+			@server.use @server.router
+			@server.use express.static @publicPath
 
 			# Now.js
-			@everyone = now.initialize @app, clientWrite: false
+			@everyone = now.initialize @server, clientWrite: false
 
 			# Nowpad
-			nowpad.setup @app, @everyone
+			nowpad.setup @server, @everyone
 
 			# Coffee4Clients
-			coffee4clients.setup @app, @publicPath
+			coffee4clients.setup @server, @publicPath
 
 		# Init Server
-		@app.listen(9573);
-		console.log 'Express server listening on port %d', @app.address().port
+		@server.listen @port
+		console.log 'Express server listening on port %d', @server.address().port
 
 		# File Center then Communication Center
 		@fileCenter => @comCenter()
 	
 	# Establish a File Center
 	fileCenter: (next) ->
+		filepad = @
+
 		# Scan the directory for files
 		util.scandir(
 			# Path
@@ -97,7 +101,7 @@ filepad =
 		)
 
 		# Setup up watches for the files
-		watch.createMonitor @filePath, (monitor) =>
+		watch.createMonitor @filePath, (monitor) ->
 			# File Changed
 			# monitor.on 'changed', (fileFullPath,newStat,oldStat) ->
 			#	DocPad.generate()
@@ -122,6 +126,8 @@ filepad =
 	
 	# Add a file
 	addFile: (fileFullPath) ->
+		filepad = @
+
 		# Fetch
 		fileRelativePath = fileFullPath.replace(@filePath,'').replace(/^\/+/,'')
 		fileSlug = util.generateSlugSync fileRelativePath
@@ -192,6 +198,7 @@ filepad =
 
 	# Establish Communication Center between Client and Server
 	comCenter: ->
+		filepad = @
 		everyone = @everyone
 		
 		# A client has connected
@@ -265,9 +272,10 @@ filepad =
 			# Clients will be synced
 			throw new Error 'not yet implemented'
 
-
-# Initialise
-filepad.init()
+# API
+filepad =
+	createInstance: (config) ->
+		return new Filepad(config)
 
 # Export
 module.exports = filepad

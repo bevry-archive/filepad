@@ -35,8 +35,8 @@ FilePad is a file browser and editor built with node.js, coffeecript and nowpad
 	require('coffee-script');
 	filepad = require('filepad');
 
-	// Setup with your Express Server
-	filepad.setup(app,pathToEdit);
+	// Initialise the FilePad Server
+	filepad.setup(pathToEdit,options);
 	```
 
 - With Node.js in CoffeeScript
@@ -45,13 +45,14 @@ FilePad is a file browser and editor built with node.js, coffeecript and nowpad
 	# Include FilePad
 	filepad = require 'filepad'
 
-	# Setup with your Express Server
-	filepad.setup app, pathToEdit
-
-The `app` variable is your express server, and the `pathToEdit` variable is the full path of the directory you want to edit with FilePad
+	# Initialise the FilePad Server
+	filepad.setup pathToEdit, options
 
 
 ## History
+
+- v0.3 May 20, 2011
+	- Now supports multiple filepad isntances
 
 - v0.2 May 19, 2011
 	- Got file saving going
