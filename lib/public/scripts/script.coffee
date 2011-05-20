@@ -94,10 +94,15 @@
 			
 			# Save + Revert Actions
 			$(document).keydown (event) ->
+				console.log event.which
 				# ctrl+s
 				if event.ctrlKey and event.which is 83
 					event.preventDefault()
 					filepad.saveAction()
+				# ctrl+alt+w
+				if event.ctrlKey and event.which is 87
+					event.preventDefault()
+					filepad.closeFile()
 				# ctrl+alt+r
 				if event.ctrlKey and event.altKey and event.which is 82 
 					event.preventDefault()
@@ -111,18 +116,30 @@
 		currentFileId: ->
 			return @$mainTabs.find('.active').attr('for').replace /^file\-/, ''
 		
+		# Close a File
+		closeFile: (fileId) ->
+			fileId or= @currentFileId()
+			elementId = 'file-'+fileId
+			$('#'+elementId).remove()
+			@$mainTabs.find('.tab[for='+elementId+']').remove()
+
 		# Save Action
 		saveAction: ->
 			fileId = @currentFileId()
 			if fileId
 				@$mainStatus.attr 'title', @$mainStatus.text()
 				@$mainStatus.text 'Saving...'
-				window.now.filepad_saveFile fileId, =>
-					window.setTimeout(
-						=>
-							@$mainStatus.text @$mainStatus.attr 'title'
-						1500
-					)
+				doneSaving = =>
+					@$mainStatus.text @$mainStatus.attr 'title'
+				timeout = window.setTimeout(
+					=>
+						alert 'save timed out'
+						doneSaving()
+					5000
+				)
+				window.now.filepad_saveFile fileId, ->
+					clearTimeout timeout
+					window.setTimeout doneSaving, 1500
 		
 		# Revert Action
 		revertAction: ->
@@ -182,8 +199,7 @@
 					# Keep
 				else
 					# Remove
-					$pad.remove()
-					$main.find('> .tabs > .tab[for='+id+']').remove()
+					filepad.closeFile slug
 				
 				# End
 				return

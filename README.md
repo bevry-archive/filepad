@@ -53,6 +53,11 @@ The `app` variable is your express server, and the `pathToEdit` variable is the 
 
 ## History
 
+- v0.2 May 19, 2011
+	- Got file saving going
+	- Got file listings refreshing when files are added or deleted
+	- Added a login modal for the future
+
 - v0.1 May 18, 2011
 	- Initial commit
 

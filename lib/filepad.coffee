@@ -149,6 +149,7 @@ filepad =
 		fs.readFile fileFullPath, (err,data) ->
 			throw err if err
 			value = data.toString()
+			filepad.files.slugsToValue[fileSlug] = value
 			nowpad.addDocument fileSlug, value
 		
 		# Return
@@ -247,20 +248,23 @@ filepad =
 		# next(err)
 		everyone.now.filepad_saveFile = (fileId,next) ->
 			fileFullPath = filepad.files.slugsToFullPath[fileId]
+			value = filepad.files.slugsToValue[fileId]
 			# Check
 			unless fileFullPath
 				throw new Error 'Could not find the file with id '+fileId
 			# Success
-			fs.writeFile fileFullPath, filepad.files.slugsToValue[fileId], (err) ->
+			fs.writeFile fileFullPath, value, (err) ->
 				throw err if err
 				next false
 
 		# Revert a file
 		# next(err)
-		everyone.now.filepad_saveFile = (fileId,next) ->
+		everyone.now.filepad_revertFile = (fileId,next) ->
 			# Read the local file
 			# Submit the patch to nowpad
 			# Clients will be synced
+			throw new Error 'not yet implemented'
+
 
 # Initialise
 filepad.init()
