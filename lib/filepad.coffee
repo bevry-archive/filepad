@@ -15,22 +15,26 @@ class Filepad
 	# Server
 	server: null
 	everyone: null
+	nowpad: null
 	port: 9573
 	filePath: process.cwd()
 	publicPath: __dirname+'/public'
 
 	# Filepad
-	files:
-		slugsToFullPath: {}
-		slugsToRelativePath: {}
-		tree: {}
-		slugsToValue: {}
+	files: null
 
 	# Initialise
 	constructor: ({path,port}={}) ->
 		# Prepare
 		@filePath = path || process.argv[2] || @filePath
 		@port = port || @port
+
+		# Clean
+		@files = 
+			slugsToFullPath: {}
+			slugsToRelativePath: {}
+			tree: {}
+			slugsToValue: {}
 
 		# Correct
 		if @filePath.substring(0,1) is '.'
@@ -58,7 +62,10 @@ class Filepad
 			@everyone = now.initialize @server, clientWrite: false
 
 			# Nowpad
-			nowpad.setup @server, @everyone
+			@nowpad = nowpad.createInstance(
+				server: @server
+				everyone: @everyone
+			)
 
 			# Coffee4Clients
 			coffee4clients.setup @server, @publicPath
@@ -121,7 +128,7 @@ class Filepad
 				filepad.broadcastFiles()
 		
 		# Fire when a change syncs to the server
-		nowpad.bind 'sync', (fileId,value) ->
+		@nowpad.bind 'sync', (fileId,value) ->
 			filepad.files.slugsToValue[fileId] = value
 	
 	# Add a file
@@ -152,11 +159,11 @@ class Filepad
 		fileParent[path.basename(fileRelativePath)] = fileSlug
 
 		# Add to nowpad
-		fs.readFile fileFullPath, (err,data) ->
+		fs.readFile fileFullPath, (err,data) =>
 			throw err if err
 			value = data.toString()
 			filepad.files.slugsToValue[fileSlug] = value
-			nowpad.addDocument fileSlug, value
+			@nowpad.addDocument fileSlug, value
 		
 		# Return
 		return fileSlug
@@ -187,7 +194,7 @@ class Filepad
 		delete fileParent[path.basename(fileRelativePath)]
 
 		# Remove from nowpad
-		nowpad.delDocument fileSlug
+		@nowpad.delDocument fileSlug
 		
 		# Return
 		return fileSlug
