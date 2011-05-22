@@ -27,8 +27,12 @@
 			rb: 'ruby'
 			svg: 'svg'
 			xml: 'xml'
+		editors: {}
+		contentHeight: 0
+		contentWidth: 0
 		
 		# Elements
+		$sidebar: null
 		$main: null
 		$mainTabs: null
 		$mainPanels: null
@@ -39,6 +43,9 @@
 		# Initialise
 		init: -> $ =>
 			# Elements
+			@$login = $ '#login'
+			@$overlay = $ '#overlay'
+			@$sidebar = $ '#sidebar'
 			@$main = $ '#main'
 			@$mainTabs = @$main.children '.tabs:first'
 			@$mainPanels = @$main.children '.panels:first'
@@ -46,8 +53,37 @@
 			@$mainStatus = @$mainActions.find '.action-status:first'
 			@$files = $ '#files'
 
+
+			# Resize
+			$window = $(window)
+			$window.resize =>
+				windowHeight = $window.height()
+				windowWidth = $window.width()
+				@$main.add(@$sidebar).height windowHeight
+
+				@contentHeight = windowHeight - 30
+				@contentWidth = windowWidth - 220
+
+				$('.panels').height @contentHeight
+				$('.editable,.ace').height(@contentHeight).width(@contentWidth)
+
+				for own key, editor of @editors
+					editor.resize()
+
+
+			$window.trigger 'resize'
+
+			# Server Timeout
+			timeoutCallback = ->
+				throw new Error 'Could not connect to the server'
+			timeout = window.setTimeout timeoutCallback, 1500
+
 			# Server
 			window.now.ready ->
+				# Clean
+				clearTimeout timeout
+				filepad.$login.add(filepad.$overlay).fadeOut(500)
+
 				# Handshake
 				window.now.filepad_handshake(
 					# Notify List
@@ -122,6 +158,7 @@
 			elementId = 'file-'+fileId
 			$('#'+elementId).remove()
 			@$mainTabs.find('.tab[for='+elementId+']').remove()
+			delete @editors[fileId]
 
 		# Save Action
 		saveAction: ->
@@ -226,6 +263,7 @@
 
 				# Add panel
 				$panel = $ '<section id="file-'+fileSlug+'" class="panel active"><div class="editable"><pre class="ace"/></div></section>'
+				$panel.find('.editable,.ace').height(@contentHeight).width(@contentWidth)
 				@$mainPanels.append $panel
 
 				# Initialise Ace
@@ -238,6 +276,9 @@
 					Mode = require('ace/mode/'+mode).Mode
 					editor.getSession().setMode new Mode()
 				
+				# Save Editor
+				@editors[fileSlug] = editor
+
 				# Initialise NowPad
 				nowpad.createInstance(
 					element: editor
