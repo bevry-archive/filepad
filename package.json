@@ -1,6 +1,6 @@
 {
 	"name": "filepad",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "FilePad is a file browser and editor built with node.js, coffeecript and nowpad",
 	"homepage": "https://github.com/balupton/filepad",
 	"keywords": [

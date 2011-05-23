@@ -21,7 +21,7 @@ FilePad is a file browser and editor built with node.js, coffeecript and nowpad
 
 1. Start filepad
 
-	filepad
+		filepad [directory path you would like to edit]
 
 2. Open http://localhost:9573/ in your browser
 
