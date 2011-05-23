@@ -157,7 +157,11 @@
 			fileId or= @currentFileId()
 			elementId = 'file-'+fileId
 			$('#'+elementId).remove()
-			@$mainTabs.find('.tab[for='+elementId+']').remove()
+			$tab = @$mainTabs.find('.tab[for='+elementId+']')
+			$next = $tab.next()
+			if $next.length is 0 then $next = $tab.prev()
+			if $next.length isnt 0 then $next.trigger 'click'
+			$tab.remove()
 			delete @editors[fileId]
 
 		# Save Action
