@@ -9,7 +9,7 @@
 
 		# Variables
 		files:
-			slugsToPaths: {}
+			paths: {}
 			tree: {}
 		extsToMode:
 			c: 'c_cpp'
@@ -117,16 +117,22 @@
 				event.stopPropagation()
 				filepad.editFile $file.attr 'for'
 
-			# Tabs
-			$('.tab').live 'click', (event) ->
-				# Tab
-				$tab = $(this).addClass 'active'
-				$tab.siblings().removeClass 'active'
-				# For
-				$for = $('#' + $tab.attr('for'))
-				if $for.length
-					$for.addClass 'active'
-					$for.siblings().removeClass 'active'
+			# Sidebar Tabs
+			$('#sidebar .tab').live 'click', (event) ->
+				# Fetch
+				$tab = $(this)
+				id = $tab.attr 'for'
+				$panel = $ '#'+id
+
+				# Active
+				$tab.addClass('active').siblings().removeClass 'active'
+				if $panel.length isnt 0
+					$panel.addClass('active').siblings().removeClass 'active'
+			
+			# Main Tabs
+			$('#main .tab').live 'click', (event) ->
+				# Select
+				filepad.selectFile $(this).attr 'for'
 			
 			# Save + Revert Actions
 			$(document).keydown (event) ->
@@ -148,25 +154,9 @@
 			$('#main-revert').click (event) ->
 				filepad.revertAction()
 			
-		# Get Current File
-		currentFileId: ->
-			return @$mainTabs.find('.active').attr('for').replace /^file\-/, ''
-		
-		# Close a File
-		closeFile: (fileId) ->
-			fileId or= @currentFileId()
-			elementId = 'file-'+fileId
-			$('#'+elementId).remove()
-			$tab = @$mainTabs.find('.tab[for='+elementId+']')
-			$next = $tab.next()
-			if $next.length is 0 then $next = $tab.prev()
-			if $next.length isnt 0 then $next.trigger 'click'
-			$tab.remove()
-			delete @editors[fileId]
-
 		# Save Action
 		saveAction: ->
-			fileId = @currentFileId()
+			fileId = @activeFile()
 			if fileId
 				@$mainStatus.attr 'title', @$mainStatus.text()
 				@$mainStatus.text 'Saving...'
@@ -212,6 +202,22 @@
 			
 			# End
 			return
+		
+		# Storage
+		store: (data) ->
+			result = {}
+			name = 'filepad'
+			
+			if window.localStorage and window.JSON
+				if data
+					try
+						result = JSON.parse localStorage.getItem name
+				else
+					try
+						localStorage.setItem name, JSON.stringify data
+						result = data
+				
+			return result
 
 		# Refresh Files
 		refreshFiles: (files) ->
@@ -227,8 +233,17 @@
 			# Refresh file tree
 			@refreshFileTree files.tree
 
-			# Ensure that any open documents actually still exist
+			# Fetch open documents
 			$pads = $main.find '> .panels > .panel'
+
+			# Check local storage
+			if $pads.length is 0
+				data = @store
+				if data and data.files and data.files.length
+					for file in data.files
+						@editFile file
+
+			# Ensure that any open documents actually still exist
 			$pads.each ->
 				# Fetch
 				$pad = $ this
@@ -236,7 +251,7 @@
 				slug = id.replace(/^file\-/,'')
 
 				# Exists?
-				if files.slugsToPath[slug]
+				if files.paths[slug]
 					# Keep
 				else
 					# Remove
@@ -248,25 +263,77 @@
 			# End
 			return
 		
-		# Check if we are editing the file
-		editingFile: (fileSlug) ->
-			return $('.tab[for=file-'+fileSlug+']')
+		# Fetch Path
+		getPath: (fileId) ->
+			return @files.paths[fileId]
+		
+		# Fetch Tab
+		getTab: (fileId) ->
+			return @$mainTabs.find '.tab[for='+fileId+']'
+		
+		# Fetch Panel
+		getPanel: (fileId) ->
+			return @$mainPanels.find '.panel[for='+fileId+']'
+		
+		# Editing File
+		editingFile: (fileId) ->
+			return @getTab(fileId).length isnt 0
+		
+		# Fetch Active File
+		activeFile: (fileId) ->
+			if fileId
+				return @activeFile() is fileId
+			else
+				return @$mainTabs.find('.active').attr('for')
+		
+		# Close File
+		closeFile: (fileId) ->
+			# Fetch
+			fileId or= @activeFile()
+
+			# Elements
+			$tab = @getTab fileId
+			$panel = @getPanel fileId
+
+			# Select Other
+			$next = $tab.next()
+			if $next.length is 0 then $next = $tab.prev()
+			if $next.length isnt 0 then $next.trigger 'click'
+
+			# Remove
+			$tab.remove()
+			$panel.remove()
+			delete @editors[fileId]
+
+		# Select File
+		selectFile: (fileId) ->
+			# Tab
+			$tab = @getTab(fileId)
+			$tab.addClass('active').siblings().removeClass 'active'
+
+			# Panel
+			$panel = @getPanel fileId
+			if $panel.length isnt 0
+				$panel.addClass('active').siblings().removeClass 'active'
 
 		# Edit File
-		editFile: (fileSlug) ->
+		editFile: (fileId) ->
+			# Check
+			if typeof @files.paths[fileId] is 'undefined'
+				return
+			
 			# Fetch
-			fileRelativePath = @files.slugsToPath[fileSlug]
-			id = 'file-'+fileSlug
+			fileRelativePath = @getPath fileId
 
 			# Add elements
-			$tab = @editingFile fileSlug
+			$tab = @getTab fileId
 			if $tab.length is 0
 				# Add tab
-				$tab = $ '<li class="tab active" for="file-'+fileSlug+'">'+fileRelativePath+'</li>'
+				$tab = $ '<li class="tab active" for="'+fileId+'">'+fileRelativePath+'</li>'
 				@$mainTabs.append $tab
 
 				# Add panel
-				$panel = $ '<section id="file-'+fileSlug+'" class="panel active"><div class="editable"><pre class="ace"/></div></section>'
+				$panel = $ '<section for="'+fileId+'" class="panel active"><div class="editable"><pre class="ace"/></div></section>'
 				$panel.find('.editable,.ace').height(@contentHeight).width(@contentWidth)
 				@$mainPanels.append $panel
 
@@ -275,22 +342,22 @@
 
 				# Customise Ace
 				editor.setShowPrintMargin false
-				mode = @extsToMode[fileSlug.replace(/.+\-([a-zA-Z0-9]+)$/,'$1')]
+				mode = @extsToMode[fileId.replace(/.+\-([a-zA-Z0-9]+)$/,'$1')]
 				if mode
 					Mode = require('ace/mode/'+mode).Mode
 					editor.getSession().setMode new Mode()
 				
 				# Save Editor
-				@editors[fileSlug] = editor
+				@editors[fileId] = editor
 
 				# Initialise NowPad
 				nowpad.createInstance(
 					element: editor
-					documentId: fileSlug
+					documentId: fileId
 				)
 
 			else
-				$panel = $('.panel[for=file-'+fileSlug+']')
+				$panel = $('.panel[for=file-'+fileId+']')
 			
 			# Select
 			$tab.trigger 'click'

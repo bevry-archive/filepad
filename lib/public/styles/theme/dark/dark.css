@@ -160,6 +160,18 @@ LAYOUT
 	-webkit-box-sizing:border-box;
 }
 
+#help {
+	position:absolute;
+	width:220px;
+	padding:5px;
+	bottom:0;
+	left: 0;
+
+	box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+}
+
 .editable,.ace {
 	margin:0;
 	padding:0;
@@ -273,14 +285,16 @@ PANELS
 	padding:5px;
 }
 
-
+.users {
+	display:none;
+}
 
 /***************************************************************
 FILES
 ****************************************************************/
 
 
-.files li {
+.tree li {
 	margin-left:10px;
 	line-height:1.5em;
 
@@ -288,15 +302,15 @@ FILES
 	font-size: 11px;
 	overflow: hidden;
 }
-.files .dir > span:before {
+.tree .dir > span:before {
 	content: "\203A \00a0 \00a0";
 }
-.files .dir.open > span:before {
+.tree .dir.open > span:before {
 	content: "\2665 \00a0";
 }
-.files .dir > nav {
+.tree .dir > nav {
 	display:none;
 }
-.files .dir.open > nav {
+.tree .dir.open > nav {
 	display:block;
 }

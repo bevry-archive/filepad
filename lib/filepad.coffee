@@ -225,7 +225,7 @@ class Filepad
 			@now.filepad_notifyList = notifyList
 
 			# Return a list of files
-			next false, {slugsToPath: filepad.files.slugsToRelativePath, tree: filepad.files.tree}
+			next false, {paths: filepad.files.slugsToRelativePath, tree: filepad.files.tree}
 		
 		# Create a a new file
 		# next(err,slug,fileRelativePath)

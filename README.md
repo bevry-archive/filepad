@@ -35,8 +35,8 @@ FilePad is a file browser and editor built with node.js, coffeecript and nowpad
 	require('coffee-script');
 	filepad = require('filepad');
 
-	// Initialise the FilePad Server
-	filepad.setup(pathToEdit,options);
+	// Create a FilePad Instance
+	myFilepad = filepad.createInstance({path: 'lib/public', port: '9573'});
 	```
 
 - With Node.js in CoffeeScript
@@ -45,11 +45,14 @@ FilePad is a file browser and editor built with node.js, coffeecript and nowpad
 	# Include FilePad
 	filepad = require 'filepad'
 
-	# Initialise the FilePad Server
-	filepad.setup pathToEdit, options
+	# Create a FilePad Instance
+	myFilepad = filepad.createInstance path: 'lib/public', port: '9573'
 
 
 ## History
+
+- v0.4 May 23, 2011
+	- UI cleaning
 
 - v0.3 May 20, 2011
 	- Now supports multiple filepad isntances
