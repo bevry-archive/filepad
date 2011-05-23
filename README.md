@@ -49,6 +49,11 @@ FilePad is a file browser and editor built with node.js, coffeecript and nowpad
 	myFilepad = filepad.createInstance path: 'lib/public', port: '9573'
 
 
+## Learning
+
+[To learn more about FilePad visit its wiki here](https://github.com/balupton/filepad/wiki)
+
+
 ## History
 
 - v0.4 May 23, 2011
