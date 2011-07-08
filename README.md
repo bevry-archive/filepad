@@ -56,6 +56,9 @@ FilePad is a file browser and editor built with node.js, coffeecript and nowpad
 
 ## History
 
+- v0.5 July 8, 2011
+	- Updated libraries
+
 - v0.4 May 23, 2011
 	- UI cleaning
 

@@ -1,6 +1,6 @@
 {
 	"name": "filepad",
-	"version": "0.4.1",
+	"version": "0.5.0",
 	"description": "FilePad is a file browser and editor built with node.js, coffeecript and nowpad",
 	"homepage": "https://github.com/balupton/filepad",
 	"keywords": [
@@ -44,12 +44,12 @@
 		"url" : "http://github.com/balupton/filepad.git"
 	},
 	"dependencies": {
-		"express": ">=2.3.2",
-		"watch": ">=0.3.1",
-		"bal-util": ">=0.1.0",
+		"express": ">=2.4.2",
+		"watch-tree": ">=0.1.1",
+		"bal-util": ">=0.4.0",
 		"now": ">=0.1.0",
 		"nowpad": ">=0.11.0",
-		"coffee4clients": ">=0.1.0",
+		"coffee4clients": ">=0.2.2",
 		"coffee-script": ">=1.1.1"
 	},
 	"engines" : {

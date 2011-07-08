@@ -5,7 +5,7 @@ express = require 'express'
 now = require 'now'
 nowpad = require 'nowpad'
 coffee4clients = require 'coffee4clients'
-watch = require 'watch'
+watchTree = require 'watch-tree'
 util = require 'bal-util'
 coffee = require 'coffee-script'
 
@@ -68,8 +68,11 @@ class Filepad
 			)
 
 			# Coffee4Clients
-			coffee4clients.setup @server, @publicPath
-
+			coffee4clients.createInstance {
+				server: @server
+				publicPath: @publicPath
+			}
+		
 		# Init Server
 		@server.listen @port
 		console.log 'Express server listening on port %d', @server.address().port
@@ -108,25 +111,22 @@ class Filepad
 		)
 
 		# Setup up watches for the files
-		watch.createMonitor @filePath, (monitor) ->
-			# File Changed
-			# monitor.on 'changed', (fileFullPath,newStat,oldStat) ->
-			#	DocPad.generate()
-			
-			# File Created
-			monitor.on 'created', (fileFullPath,stat) ->
-				# Add to files
-				slug = filepad.addFile fileFullPath
-				# Broadcast files
-				filepad.broadcastFiles()
-			
-			# File Deleted
-			monitor.on 'removed', (fileFullPath,stat) ->
-				# Remove from files
-				slug = filepad.delFile fileFullPath
-				# Broadcast files
-				filepad.broadcastFiles()
+		watcher = watchTree.watchTree(@filePath)
 		
+		# File Deleted
+		watcher.on 'fileDeleted', (fileFullPath) ->
+			# Remove from files
+			slug = filepad.delFile fileFullPath
+			# Broadcast files
+			filepad.broadcastFiles()
+		
+		# File Created
+		watcher.on 'fileCreated', (fileFullPath,stat) ->
+			# Add to files
+			slug = filepad.addFile fileFullPath
+			# Broadcast files
+			filepad.broadcastFiles()
+
 		# Fire when a change syncs to the server
 		@nowpad.bind 'sync', (fileId,value) ->
 			filepad.files.slugsToValue[fileId] = value
