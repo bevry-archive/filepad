@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/balupton/filepad.png)](http://travis-ci.org/balupton/filepad)
 # FilePad
 
 FilePad is a file browser and editor built with node.js, coffeecript and nowpad
